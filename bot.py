@@ -52,13 +52,13 @@ class FyodorBot:
         context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """Gère la commande /start"""
-        welcome_message = "*ajuste son ushanka* Que souhaitez\-vous ?"
+        welcome_message = "*observe silencieusement* Que souhaitez\-vous ?"
         try:
             await self._send_message_with_retry(update, welcome_message)
             logger.info(f"Nouvelle conversation démarrée avec {update.effective_user.id}")
         except Exception as e:
             logger.error(f"Erreur lors de la commande start: {e}")
-            await self._send_message_with_retry(update, "*silence calculateur*")
+            await self._send_message_with_retry(update, "*observe silencieusement*")
 
     async def handle_message(
         self, 
@@ -70,6 +70,9 @@ class FyodorBot:
             return
 
         try:
+            # Afficher l'action de frappe
+            await update.message.chat.send_action('typing')
+
             # Obtention de la réponse de Gemini
             response = self.gemini.get_response(update.message.text)
 
@@ -102,7 +105,7 @@ class FyodorBot:
             logger.error(f"Erreur lors du traitement du message: {e}")
             await self._send_message_with_retry(
                 update,
-                "*silence calculateur*"
+                "*observe silencieusement*"
             )
 
     async def error_handler(

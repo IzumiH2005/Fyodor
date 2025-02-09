@@ -9,8 +9,8 @@ class ImageHandler:
         self.next_image_interval = self._generate_new_interval()
 
     def _generate_new_interval(self) -> int:
-        """Génère un nouvel intervalle aléatoire entre 5 et 10"""
-        return random.randint(5, 10)
+        """Génère un nouvel intervalle aléatoire entre 3 et 6"""
+        return random.randint(3, 6)
 
     def should_send_image(self) -> bool:
         """Détermine si une image doit être envoyée"""
@@ -22,7 +22,7 @@ class ImageHandler:
             return True
         return False
 
-    def get_random_image(self) -> str:
+    def get_random_image(self) -> str | None:
         """Retourne un chemin d'image aléatoire"""
         try:
             image_path = random.choice(FYODOR_IMAGES)

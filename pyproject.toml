@@ -7,6 +7,5 @@ dependencies = [
     "google-generativeai>=0.8.4",
     "python-dotenv>=1.0.1",
     "python-telegram-bot==20.7",
-    "slack-sdk>=3.34.0",
     "telegram>=0.0.1",
 ]

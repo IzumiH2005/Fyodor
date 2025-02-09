@@ -473,7 +473,6 @@ dependencies = [
     { name = "google-generativeai" },
     { name = "python-dotenv" },
     { name = "python-telegram-bot" },
-    { name = "slack-sdk" },
     { name = "telegram" },
 ]
 
@@ -482,7 +481,6 @@ requires-dist = [
     { name = "google-generativeai", specifier = ">=0.8.4" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "python-telegram-bot", specifier = "==20.7" },
-    { name = "slack-sdk", specifier = ">=3.34.0" },
     { name = "telegram", specifier = ">=0.0.1" },
 ]
 
@@ -511,15 +509,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/aa/65/7d973b89c4d2351d7fb232c2e452547ddfa243e93131e7cfa766da627b52/rsa-4.9.tar.gz", hash = "sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21", size = 29711 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/49/97/fa78e3d2f65c02c8e1268b9aba606569fe97f6c8f7c2d74394553347c145/rsa-4.9-py3-none-any.whl", hash = "sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7", size = 34315 },
-]
-
-[[package]]
-name = "slack-sdk"
-version = "3.34.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6e/ff/6eb67fd5bd179fa804dbd859d88d872d3ae343955e63a319a73a132d406f/slack_sdk-3.34.0.tar.gz", hash = "sha256:ff61db7012160eed742285ea91f11c72b7a38a6500a7f6c5335662b4bc6b853d", size = 233629 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/25/2d/8724ef191cb64907de1e4e4436462955501e00f859a53d0aa794d0d060ff/slack_sdk-3.34.0-py2.py3-none-any.whl", hash = "sha256:c61f57f310d85be83466db5a98ab6ae3bb2e5587437b54fa0daa8fae6a0feffa", size = 292480 },
 ]
 
 [[package]]

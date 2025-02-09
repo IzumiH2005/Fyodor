@@ -58,7 +58,7 @@ class GeminiHandler:
 
         except Exception as e:
             logger.error(f"Erreur lors de la génération de réponse: {e}")
-            return "*ajuste son ushanka dans un silence calculateur*"
+            return "*observe silencieusement*"
 
     def reset_chat(self) -> None:
         """Réinitialise la conversation"""

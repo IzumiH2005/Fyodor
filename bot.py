@@ -26,9 +26,9 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         try:
             if self.path == '/health':
                 self.send_response(200)
-                self.send_header('Content-type', 'text/plain')
+                self.send_header('Content-type', 'text/plain; charset=utf-8')
                 self.end_headers()
-                self.wfile.write("Fyodor ON \xe2\x9c\x85 devoile moi tes peches...".encode('utf-8'))
+                self.wfile.write("Fyodor ON ✅ dévoile moi tes péchés...".encode('utf-8'))
                 logger.info("Health check request successful")
             else:
                 self.send_response(404)

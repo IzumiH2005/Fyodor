@@ -2,8 +2,8 @@ import asyncio
 import traceback
 import os
 from typing import Optional, Union
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
-from flask import Flask
 
 from telegram import Update
 from telegram.ext import (
@@ -21,16 +21,21 @@ from gemini_handler import GeminiHandler
 from image_handler import ImageHandler
 from logger_config import logger
 
-# Création de l'application Flask pour le health check
-health_app = Flask(__name__)
-
-@health_app.route('/health')
-def health_check():
-    return {'status': 'OK'}, 200
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/health':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b"OK")
+        else:
+            self.send_response(404)
+            self.end_headers()
 
 def run_health_server():
-    """Démarre le serveur Flask sur le port 8080"""
-    health_app.run(host='0.0.0.0', port=8080)
+    """Démarre le serveur de health check sur le port 8080"""
+    server = HTTPServer(('0.0.0.0', 8080), HealthCheckHandler)
+    server.serve_forever()
 
 class FyodorBot:
     """Bot Telegram imitant Fyodor Dostoevsky"""

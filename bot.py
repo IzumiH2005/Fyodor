@@ -23,19 +23,31 @@ from logger_config import logger
 
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/health':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b"Fyodor ON \xe2\x9c\x85 devoile moi tes peches...")
-        else:
-            self.send_response(404)
+        try:
+            if self.path == '/health':
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write("Fyodor ON \xe2\x9c\x85 devoile moi tes peches...".encode('utf-8'))
+                logger.info("Health check request successful")
+            else:
+                self.send_response(404)
+                self.end_headers()
+        except Exception as e:
+            logger.error(f"Error in health check handler: {e}")
+            self.send_response(500)
             self.end_headers()
 
 def run_health_server():
-    """Démarre le serveur de health check sur le port 8080"""
-    server = HTTPServer(('0.0.0.0', 8080), HealthCheckHandler)
-    server.serve_forever()
+    """Démarre le serveur de health check sur le port 8000"""
+    try:
+        logger.info("Starting health check server on port 8000...")
+        server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
+        logger.info("Health check server started successfully")
+        server.serve_forever()
+    except Exception as e:
+        logger.error(f"Error starting health check server: {e}")
+        logger.error(traceback.format_exc())
 
 class FyodorBot:
     """Bot Telegram imitant Fyodor Dostoevsky"""
@@ -155,17 +167,21 @@ class FyodorBot:
 def main() -> None:
     """Point d'entrée principal du bot"""
     try:
+        logger.info("Starting Fyodor bot application...")
+
         # Démarrage du serveur de health check dans un thread séparé
         health_thread = Thread(target=run_health_server)
         health_thread.daemon = True
         health_thread.start()
-        logger.info("Serveur de health check démarré sur le port 8080")
+        logger.info("Health check thread started")
 
         # Initialisation du bot
         bot = FyodorBot()
+        logger.info("Bot initialized")
 
         # Création de l'application
         application = Application.builder().token(TELEGRAM_TOKEN).build()
+        logger.info("Telegram application created")
 
         # Ajout des handlers
         application.add_handler(CommandHandler("start", bot.start_command))
@@ -176,13 +192,15 @@ def main() -> None:
             )
         )
         application.add_error_handler(bot.error_handler)
+        logger.info("All handlers added")
 
         # Démarrage du bot
-        logger.info("Démarrage du bot Fyodor...")
+        logger.info("Starting Telegram bot polling...")
         application.run_polling()
 
     except Exception as e:
-        logger.critical(f"Erreur fatale lors du démarrage du bot: {e}")
+        logger.critical(f"Fatal error during bot startup: {e}")
+        logger.critical(traceback.format_exc())
         raise
 
 if __name__ == "__main__":

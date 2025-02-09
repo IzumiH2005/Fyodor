@@ -1,16 +1,19 @@
 import asyncio
 import traceback
-from typing import NoReturn, Optional
+import os
+from typing import Optional, Union
 
-from telegram import Update, ParseMode
+from telegram import Update
 from telegram.ext import (
-    Updater,
+    Application,
     CommandHandler,
     MessageHandler,
-    Filters,
-    CallbackContext
+    ContextTypes,
+    filters
 )
+from telegram.constants import ParseMode
 from telegram.error import TelegramError
+
 from config import TELEGRAM_TOKEN
 from gemini_handler import GeminiHandler
 from image_handler import ImageHandler
@@ -24,54 +27,43 @@ class FyodorBot:
         self.gemini = GeminiHandler()
         self.image_handler = ImageHandler()
 
-    def _send_message_with_retry(
+    async def _send_message_with_retry(
         self, 
         update: Update, 
         text: str, 
         max_retries: int = 3,
         retry_delay: float = 1.0
     ) -> bool:
-        """
-        Envoie un message avec système de retry
-
-        Args:
-            update: L'update Telegram
-            text: Le texte à envoyer
-            max_retries: Nombre maximum de tentatives
-            retry_delay: Délai entre les tentatives en secondes
-
-        Returns:
-            bool: True si envoi réussi, False sinon
-        """
+        """Envoie un message avec système de retry"""
         for attempt in range(max_retries):
             try:
-                update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+                await update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2)
                 return True
             except TelegramError as e:
                 logger.warning(f"Tentative {attempt + 1}/{max_retries} échouée: {e}")
                 if attempt < max_retries - 1:
-                    asyncio.sleep(retry_delay)
+                    await asyncio.sleep(retry_delay)
                 continue
         return False
 
-    def start_command(
+    async def start_command(
         self, 
         update: Update, 
-        context: CallbackContext
+        context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """Gère la commande /start"""
-        welcome_message = "*ajuste son ushanka* Que souhaitez-vous ?"
+        welcome_message = "*ajuste son ushanka* Que souhaitez\-vous ?"
         try:
-            self._send_message_with_retry(update, welcome_message)
+            await self._send_message_with_retry(update, welcome_message)
             logger.info(f"Nouvelle conversation démarrée avec {update.effective_user.id}")
         except Exception as e:
             logger.error(f"Erreur lors de la commande start: {e}")
-            self._send_message_with_retry(update, "*silence calculateur*")
+            await self._send_message_with_retry(update, "*silence calculateur*")
 
-    def handle_message(
+    async def handle_message(
         self, 
         update: Update, 
-        context: CallbackContext
+        context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """Gère les messages reçus"""
         if not update.message or not update.message.text:
@@ -81,8 +73,11 @@ class FyodorBot:
             # Obtention de la réponse de Gemini
             response = self.gemini.get_response(update.message.text)
 
+            # Échapper les caractères spéciaux pour Markdown V2
+            response = response.replace('-', '\-').replace('.', '\.').replace('!', '\!')
+
             # Envoi de la réponse
-            message_sent = self._send_message_with_retry(update, response)
+            message_sent = await self._send_message_with_retry(update, response)
             if not message_sent:
                 logger.error("Impossible d'envoyer la réponse après plusieurs tentatives")
                 return
@@ -90,30 +85,35 @@ class FyodorBot:
             # Gestion des images
             if self.image_handler.should_send_image():
                 try:
-                    image_url = self.image_handler.get_random_image()
-                    update.message.reply_photo(photo=image_url)
+                    image_path = self.image_handler.get_random_image()
+                    if image_path and os.path.exists(image_path):
+                        with open(image_path, 'rb') as photo:
+                            await update.message.reply_photo(photo=photo)
+                    else:
+                        logger.warning(f"Image non trouvée ou invalide: {image_path}")
                 except TelegramError as e:
                     logger.error(f"Erreur lors de l'envoi de l'image: {e}")
+                except Exception as e:
+                    logger.error(f"Erreur inattendue lors de l'envoi de l'image: {e}")
 
             logger.info(f"Réponse envoyée à {update.effective_user.id}")
 
         except Exception as e:
             logger.error(f"Erreur lors du traitement du message: {e}")
-            self._send_message_with_retry(
+            await self._send_message_with_retry(
                 update,
                 "*silence calculateur*"
             )
 
-    def error_handler(
+    async def error_handler(
         self, 
-        update: Optional[object], 
-        context: CallbackContext
+        update: Optional[Update], 
+        context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         """Gère les erreurs de manière plus détaillée"""
         logger.error(f"Exception lors du traitement d'une update: {context.error}")
 
         try:
-            # Récupération des détails de l'erreur
             if context.error:
                 tb_list = traceback.format_exception(
                     None, 
@@ -123,39 +123,36 @@ class FyodorBot:
                 tb_string = "".join(tb_list)
                 logger.error(f"Traceback complet:\n{tb_string}")
 
-            # Notification à l'utilisateur si possible
-            if update and isinstance(update, Update) and update.effective_message:
-                update.effective_message.reply_text(
-                    "Une erreur est survenue... *regarde au loin avec dédain*",
-                    parse_mode=ParseMode.MARKDOWN
+            if update and update.effective_message:
+                await update.effective_message.reply_text(
+                    "Une erreur est survenue\.\.\. *regarde au loin avec dédain*",
+                    parse_mode=ParseMode.MARKDOWN_V2
                 )
         except Exception as e:
             logger.error(f"Erreur dans le gestionnaire d'erreurs: {e}")
 
-def main():
+def main() -> None:
     """Point d'entrée principal du bot"""
     try:
         # Initialisation du bot
         bot = FyodorBot()
 
-        # Configuration de l'updater
-        updater = Updater(TELEGRAM_TOKEN)
-        dispatcher = updater.dispatcher
+        # Création de l'application
+        application = Application.builder().token(TELEGRAM_TOKEN).build()
 
         # Ajout des handlers
-        dispatcher.add_handler(CommandHandler("start", bot.start_command))
-        dispatcher.add_handler(
+        application.add_handler(CommandHandler("start", bot.start_command))
+        application.add_handler(
             MessageHandler(
-                Filters.text & ~Filters.command,
+                filters.TEXT & ~filters.COMMAND,
                 bot.handle_message
             )
         )
-        dispatcher.add_error_handler(bot.error_handler)
+        application.add_error_handler(bot.error_handler)
 
         # Démarrage du bot
         logger.info("Démarrage du bot Fyodor...")
-        updater.start_polling()
-        updater.idle()
+        application.run_polling()
 
     except Exception as e:
         logger.critical(f"Erreur fatale lors du démarrage du bot: {e}")

@@ -6,7 +6,7 @@ load_dotenv()
 
 # Configuration des tokens
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN', '7620054760:AAEzBQD5FlD8AlB03zMXwVuQrPqZOEyL-Xk')
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAvIzsUr6u07YeNdCF1tM4tviIwaHhtaVo')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyDhhQcgce5aUPM5GndJZ8PHPjJODFKARyk')
 
 # Images de Fyodor (uniquement les 20 fournies)
 FYODOR_IMAGES = [

@@ -1,5 +1,4 @@
 import asyncio
-import traceback
 import os
 from typing import Optional, Union
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -24,23 +23,14 @@ from logger_config import logger
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/health':
-            try:
-                self.send_response(200)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write("Fyodor is watching.".encode('utf-8'))
-            except Exception as e:
-                logger.error(f"Health check error: {e}")
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write("Error".encode('utf-8'))
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write("Bot is active".encode('utf-8'))
 
 def run_health_server():
-    try:
-        server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
-        server.serve_forever()
-    except Exception as e:
-        logger.error(f"Server error: {e}")
+    server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
+    server.serve_forever()
 
 class FyodorBot:
     """Bot Telegram imitant Fyodor Dostoevsky"""

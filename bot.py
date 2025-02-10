@@ -34,6 +34,7 @@ def run_health_server():
     port = int(os.environ.get('PORT'))  # Récupère la variable d'environnement PORT ou utilise 8000 par défaut
 
 server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+logger.info(f"Health check server started on port {port}")
 server.serve_forever()
 
 class FyodorBot:

@@ -1,6 +1,6 @@
 import google.generativeai as genai
 from typing import Optional
-from config import GEMINI_API_KEY, FYODOR_PERSONA
+from config import GOOGLE_API_KEY, FYODOR_PERSONA
 from logger_config import logger
 
 class GeminiHandler:
@@ -9,7 +9,7 @@ class GeminiHandler:
     def __init__(self) -> None:
         """Initialise la connexion avec Gemini et configure le persona"""
         try:
-            genai.configure(api_key=GEMINI_API_KEY)
+            genai.configure(api_key=GOOGLE_API_KEY)
             self.model = genai.GenerativeModel('gemini-1.5-pro-latest')
             self.chat = self.model.start_chat(history=[])
             self._initialize_persona()

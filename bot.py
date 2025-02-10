@@ -22,11 +22,10 @@ from logger_config import logger
 
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/health':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            self.wfile.write("Bot is active".encode('utf-8'))
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"Bot is running")
 
 def run_health_server():
     server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
@@ -131,6 +130,7 @@ class FyodorBot:
 
         try:
             if context.error:
+                import traceback
                 tb_list = traceback.format_exception(
                     None, 
                     context.error, 

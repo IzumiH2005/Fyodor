@@ -23,31 +23,24 @@ from logger_config import logger
 
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        try:
-            if self.path == '/health':
+        if self.path == '/health':
+            try:
                 self.send_response(200)
-                self.send_header('Content-type', 'text/plain; charset=utf-8')
+                self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write("Fyodor ON ✅ dévoile moi tes péchés...".encode('utf-8'))
-                logger.info("Health check request successful")
-            else:
-                self.send_response(404)
+                self.wfile.write("Fyodor is watching.".encode('utf-8'))
+            except Exception as e:
+                logger.error(f"Health check error: {e}")
+                self.send_response(500)
                 self.end_headers()
-        except Exception as e:
-            logger.error(f"Error in health check handler: {e}")
-            self.send_response(500)
-            self.end_headers()
+                self.wfile.write("Error".encode('utf-8'))
 
 def run_health_server():
-    """Démarre le serveur de health check sur le port 8000"""
     try:
-        logger.info("Starting health check server on port 8000...")
         server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
-        logger.info("Health check server started successfully")
         server.serve_forever()
     except Exception as e:
-        logger.error(f"Error starting health check server: {e}")
-        logger.error(traceback.format_exc())
+        logger.error(f"Server error: {e}")
 
 class FyodorBot:
     """Bot Telegram imitant Fyodor Dostoevsky"""

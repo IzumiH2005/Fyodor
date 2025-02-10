@@ -30,6 +30,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
 
 def run_health_server():
     """Run a simple health check server"""
+    global port  # Accéder à la variable globale port
     port = int(os.environ.get('PORT'))  # Récupère la variable d'environnement PORT ou utilise 8000 par défaut
 
 server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)

@@ -89,6 +89,38 @@ class FyodorBot:
             return
 
         try:
+            # Vérifier si c'est un message de groupe
+            is_group = update.message.chat.type in ['group', 'supergroup']
+
+            if is_group:
+                should_respond = False
+
+                # Vérifier si le message contient "fyodor" (insensible à la casse)
+                if "fyodor" in update.message.text.lower():
+                    should_respond = True
+                    logger.info("Mot clé 'fyodor' détecté")
+
+                # Vérifier si le bot est mentionné (@username)
+                if update.message.entities:
+                    for entity in update.message.entities:
+                        if entity.type == "mention":
+                            mentioned_user = update.message.text[entity.offset:entity.offset + entity.length]
+                            if mentioned_user.lower() == f"@{context.bot.username}".lower():
+                                should_respond = True
+                                logger.info("Bot mentionné via @username")
+                                break
+
+                # Vérifier si c'est une réponse à un message du bot
+                if update.message.reply_to_message:
+                    if update.message.reply_to_message.from_user.id == context.bot.id:
+                        should_respond = True
+                        logger.info("Réponse à un message du bot")
+
+                if not should_respond:
+                    logger.info("Message ignoré - conditions de réponse non remplies")
+                    return
+
+            # Si on arrive ici, on doit répondre au message
             # Afficher l'action de frappe
             await update.message.chat.send_action('typing')
 

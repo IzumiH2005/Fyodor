@@ -9,3 +9,7 @@ oauthlib>=3.2.2
 flask-wtf>=1.2.2
 requests==2.31.0
 sendgrid
+google-generativeai
+python-dotenv
+python-telegram-bot
+requests
